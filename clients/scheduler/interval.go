@@ -17,12 +17,12 @@ package scheduler
 
 import (
 	"context"
-	"encoding/json"
 	"net/url"
 
 	"github.com/edgexfoundry/go-mod-core-contracts/clients"
 	"github.com/edgexfoundry/go-mod-core-contracts/clients/interfaces"
 	"github.com/edgexfoundry/go-mod-core-contracts/clients/types"
+	"github.com/edgexfoundry/go-mod-core-contracts/clients/unmarshaler"
 	"github.com/edgexfoundry/go-mod-core-contracts/clients/urlclient"
 	"github.com/edgexfoundry/go-mod-core-contracts/models"
 )
@@ -46,12 +46,27 @@ type IntervalClient interface {
 }
 
 type intervalRestClient struct {
-	urlClient interfaces.URLClient
+	urlClient   interfaces.URLClient
+	unmarshaler interfaces.Unmarshaler
 }
 
 // NewIntervalClient creates an instance of IntervalClient
 func NewIntervalClient(params types.EndpointParams, m interfaces.Endpointer) IntervalClient {
-	return &intervalRestClient{urlClient: urlclient.New(params, m)}
+	return &intervalRestClient{
+		urlClient:   urlclient.New(params, m),
+		unmarshaler: unmarshaler.JSON{},
+	}
+}
+
+func NewIntervalClientWithUnmarshaler(
+	params types.EndpointParams,
+	m interfaces.Endpointer,
+	unmarshaler interfaces.Unmarshaler) IntervalClient {
+
+	return &intervalRestClient{
+		urlClient:   urlclient.New(params, m),
+		unmarshaler: unmarshaler,
+	}
 }
 
 func (ic *intervalRestClient) Add(interval *models.Interval, ctx context.Context) (string, error) {
@@ -90,7 +105,7 @@ func (ic *intervalRestClient) requestInterval(urlSuffix string, ctx context.Cont
 	}
 
 	interval := models.Interval{}
-	err = json.Unmarshal(data, &interval)
+	err = ic.unmarshaler.Unmarshal(data, &interval)
 	if err != nil {
 		return models.Interval{}, err
 	}
@@ -106,7 +121,7 @@ func (ic *intervalRestClient) requestIntervalSlice(urlSuffix string, ctx context
 	}
 
 	sSlice := make([]models.Interval, 0)
-	err = json.Unmarshal(data, &sSlice)
+	err = ic.unmarshaler.Unmarshal(data, &sSlice)
 	if err != nil {
 		return []models.Interval{}, err
 	}
