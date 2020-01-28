@@ -16,12 +16,12 @@ package scheduler
 
 import (
 	"context"
-	"encoding/json"
 	"net/url"
 
 	"github.com/edgexfoundry/go-mod-core-contracts/clients"
 	"github.com/edgexfoundry/go-mod-core-contracts/clients/interfaces"
 	"github.com/edgexfoundry/go-mod-core-contracts/clients/types"
+	"github.com/edgexfoundry/go-mod-core-contracts/clients/unmarshaler"
 	"github.com/edgexfoundry/go-mod-core-contracts/clients/urlclient"
 	"github.com/edgexfoundry/go-mod-core-contracts/models"
 )
@@ -48,11 +48,27 @@ type IntervalActionClient interface {
 
 type intervalActionRestClient struct {
 	urlClient interfaces.URLClient
+	unmarshaler interfaces.Unmarshaler
 }
 
 // NewIntervalActionClient creates an instance of IntervalActionClient
 func NewIntervalActionClient(params types.EndpointParams, m interfaces.Endpointer) IntervalActionClient {
-	return &intervalActionRestClient{urlClient: urlclient.New(params, m)}
+	return &intervalActionRestClient{
+		urlClient: urlclient.New(params, m),
+		unmarshaler: unmarshaler.JSON{},
+	}
+}
+
+// NewIntervalActionClient creates an instance of IntervalActionClient with a custom defined unmarshaler.
+func NewIntervalActionClientWithUnmarshaler(
+	params types.EndpointParams,
+	m interfaces.Endpointer,
+	unmarshaler interfaces.Unmarshaler) IntervalActionClient {
+
+		return &intervalActionRestClient{
+			urlClient: urlclient.New(params, m),
+			unmarshaler: unmarshaler,
+		}
 }
 
 // Helper method to request and decode an interval action
@@ -66,7 +82,7 @@ func (iac *intervalActionRestClient) requestIntervalAction(
 	}
 
 	ia := models.IntervalAction{}
-	err = json.Unmarshal(data, &ia)
+	err = iac.unmarshaler.Unmarshal(data, &ia)
 	if err != nil {
 		return models.IntervalAction{}, err
 	}
@@ -85,7 +101,7 @@ func (iac *intervalActionRestClient) requestIntervalActionSlice(
 	}
 
 	iaSlice := make([]models.IntervalAction, 0)
-	err = json.Unmarshal(data, &iaSlice)
+	err = iac.unmarshaler.Unmarshal(data, &iaSlice)
 	if err != nil {
 		return []models.IntervalAction{}, err
 	}

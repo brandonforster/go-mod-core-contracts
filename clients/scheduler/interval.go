@@ -58,6 +58,7 @@ func NewIntervalClient(params types.EndpointParams, m interfaces.Endpointer) Int
 	}
 }
 
+// NewIntervalClientWithUnmarshaler creates an instance of IntervalClient with a custom defined unmarshaler.
 func NewIntervalClientWithUnmarshaler(
 	params types.EndpointParams,
 	m interfaces.Endpointer,
