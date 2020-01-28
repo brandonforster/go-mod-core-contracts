@@ -14,22 +14,25 @@
 
 package unmarshaler
 
-// Callback provides a way to create limited,
+// callback provides a way to create limited,
 // simple Unmarshalers for use cases like single instance unmarshalers or for testing.
-type Callback struct {
+type callback struct {
 	callbackFunc CallbackFunc
 }
 
+func NewCallback(cbf func(data []byte, v interface{}) error) callback {
+	return callback{cbf}
+}
+
 // Unmarshal calls the callback function and returns its result
-func (cb *Callback) Unmarshal(data []byte, v interface{}) error {
+func (cb *callback) Unmarshal(data []byte, v interface{}) error {
 	return cb.callbackFunc(data, v)
 }
 
 // CallbackFunc is the function that is going to do the unmarshal.
-type CallbackFunc func (data []byte, v interface{}) error
+type CallbackFunc func(data []byte, v interface{}) error
 
 // Error provides the required implementation for the Error interface.
 func (cbf CallbackFunc) Error() string {
 	return "unexpected error trying to unmarshal"
 }
-

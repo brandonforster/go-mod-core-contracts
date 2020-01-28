@@ -47,14 +47,14 @@ type IntervalActionClient interface {
 }
 
 type intervalActionRestClient struct {
-	urlClient interfaces.URLClient
+	urlClient   interfaces.URLClient
 	unmarshaler interfaces.Unmarshaler
 }
 
 // NewIntervalActionClient creates an instance of IntervalActionClient
 func NewIntervalActionClient(params types.EndpointParams, m interfaces.Endpointer) IntervalActionClient {
 	return &intervalActionRestClient{
-		urlClient: urlclient.New(params, m),
+		urlClient:   urlclient.New(params, m),
 		unmarshaler: unmarshaler.JSON{},
 	}
 }
@@ -65,10 +65,10 @@ func NewIntervalActionClientWithUnmarshaler(
 	m interfaces.Endpointer,
 	unmarshaler interfaces.Unmarshaler) IntervalActionClient {
 
-		return &intervalActionRestClient{
-			urlClient: urlclient.New(params, m),
-			unmarshaler: unmarshaler,
-		}
+	return &intervalActionRestClient{
+		urlClient:   urlclient.New(params, m),
+		unmarshaler: unmarshaler,
+	}
 }
 
 // Helper method to request and decode an interval action
